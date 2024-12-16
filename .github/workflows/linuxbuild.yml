@@ -37,3 +37,4 @@ jobs:
       - name: make
         run: | 
             sudo ./makeimage.sh win64 nonfree-shared 6.1
+            sudo ./build.sh win64 nonfree-shared 6.1
