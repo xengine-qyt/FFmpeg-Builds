@@ -1,0 +1,41 @@
+name: ubuntu build workflows
+
+on:
+  push:
+    branches: 
+      - master
+
+permissions:
+  contents: read
+  
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
+
+    steps:
+       # 检出您的主仓库代码
+      - name: Checkout main repository code
+        uses: actions/checkout@v4
+        with:
+          ref: 'develop'
+        
+      - name: install library
+        run: |
+            sudo apt remove docker docker-engine docker.io containerd runc
+            sudo apt update
+            sudo apt install -y ca-certificates curl gnupg
+            sudo mkdir -p /etc/apt/keyrings
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+            sudo apt update
+            sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+      #编译
+      - name: make
+        run: | 
+            sudo ./makeimage.sh win64 nonfree-shared 6.1
