@@ -192,7 +192,7 @@ jobs:
       fail-fast: false
       matrix:
         target: [win32, win64, winarm64]
-        variant: [nonfree-shared-vulkan 8.0] 
+        variant: [nonfree-shared 8.0] 
     steps:
       - name: Free Disk-Space
         run: df -h && sudo apt-get clean && docker system prune -a -f && sudo rm -rf /opt/ghc /usr/local/.ghcup /usr/local/lib/android && df -h
@@ -260,11 +260,11 @@ jobs:
       matrix:
         include:
           - target: win32
-            variant: nonfree-shared-vulkan 8.0
+            variant: nonfree-shared 8.0
           - target: win64
-            variant: nonfree-shared-vulkan 8.0
+            variant: nonfree-shared 8.0
           - target: winarm64
-            variant: nonfree-shared-vulkan 8.0
+            variant: nonfree-shared 8.0
     steps:
       - name: Free Disk-Space
         run: df -h && sudo apt-get clean && docker system prune -a -f && sudo rm -rf /opt/ghc /usr/local/.ghcup /usr/local/lib/android && df -h
