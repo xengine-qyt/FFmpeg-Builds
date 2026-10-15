@@ -16,16 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: 释放磁盘空间
-        run: |
-          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache
-          df -h
-
-      - name: 锁定版本为 ${{ env.EXACT_TAG }}
-        run: |
-          sed -i 's|GIT_BRANCH=".*"|GIT_BRANCH="${{ env.EXACT_TAG }}"|' addins/${{ matrix.version }}.sh
-          cat addins/${{ matrix.version }}.sh
-
       - name: 检查配置文件
         run: |
           ls variants addins
