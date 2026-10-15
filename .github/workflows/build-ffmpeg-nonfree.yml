@@ -1,0 +1,40 @@
+name: Build FFmpeg nonfree-shared (Windows)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [win64, win32, winarm64]
+    env:
+      VARIANT: nonfree-shared
+      GIT_BRANCH_OVERRIDE: n9.0.2
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check targets and variants
+        run: |
+          ls variants
+          test -f "variants/${{ matrix.target }}-${VARIANT}.sh"
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          df -h
+
+      - name: Build image
+        run: ./makeimage.sh ${{ matrix.target }} ${VARIANT}
+
+      - name: Build FFmpeg
+        run: ./build.sh ${{ matrix.target }} ${VARIANT}
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ffmpeg-9.0.2-${{ matrix.target }}-${{ env.VARIANT }}
+          path: artifacts/*
+          retention-days: 1
