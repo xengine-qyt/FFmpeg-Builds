@@ -1,8 +1,6 @@
-name: Build FFmpeg nonfree-shared From Scratch (Windows)
-
+name: Build FFmpeg nonfree-shared
 on:
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -10,37 +8,37 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [win64, win32, winarm64]
-        version: [9.0]
+        target: [win32, win64, winarm64]   # win32 先确认 variants/ 里是否存在
+        version: ["9.0"]
     env:
       VARIANT: nonfree-shared
       EXACT_TAG: n9.0.2
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: 1. 锁定版本为 n9.0.2
+      - name: 释放磁盘空间
         run: |
-          sed -i 's/GIT_BRANCH=".*"/GIT_BRANCH="${{ env.EXACT_TAG }}"/' addins/9.0.sh
-          cat addins/9.0.sh
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache
+          df -h
 
-      - name: 2. 检查配置文件
+      - name: 锁定版本为 ${{ env.EXACT_TAG }}
         run: |
-          ls variants
+          sed -i 's|GIT_BRANCH=".*"|GIT_BRANCH="${{ env.EXACT_TAG }}"|' addins/${{ matrix.version }}.sh
+          cat addins/${{ matrix.version }}.sh
+
+      - name: 检查配置文件
+        run: |
+          ls variants addins
           test -f "variants/${{ matrix.target }}-${VARIANT}.sh"
+          test -f "addins/${{ matrix.version }}.sh"
 
-      - name: 4. 从零编译通用基础镜像 (ffbuild/base)
-        run: ./makeimage.sh base
-
-      - name: 5. 从零编译交叉编译工具链 (ffbuild/base-${{ matrix.target }})
-        run: ./makeimage.sh base-${{ matrix.target }}
-
-      - name: 6. 从零编译所有第三方依赖库镜像
+      - name: 构建所有镜像(base / 工具链 / 依赖库)
         run: ./makeimage.sh ${{ matrix.target }} ${VARIANT} ${{ matrix.version }}
 
-      - name: 7. 编译 FFmpeg 9.0.2 并打包
+      - name: 编译 FFmpeg 并打包
         run: ./build.sh ${{ matrix.target }} ${VARIANT} ${{ matrix.version }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ffmpeg-${{ env.EXACT_TAG }}-${{ matrix.target }}-${{ env.VARIANT }}
           path: artifacts/*
