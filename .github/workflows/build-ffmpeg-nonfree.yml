@@ -11,9 +11,9 @@ jobs:
       fail-fast: false
       matrix:
         target: [win64, win32, winarm64]
+        version: n9.0.2
     env:
       VARIANT: nonfree-shared
-      GIT_BRANCH_OVERRIDE: n9.0.2
     steps:
       - uses: actions/checkout@v7
 
@@ -28,13 +28,13 @@ jobs:
           df -h
 
       - name: Build image
-        run: ./makeimage.sh ${{ matrix.target }} ${VARIANT}
+        run: ./makeimage.sh ${{ matrix.target }} ${VARIANT} ${{ matrix.version }}
 
       - name: Build FFmpeg
-        run: ./build.sh ${{ matrix.target }} ${VARIANT}
+        run: ./build.sh ${{ matrix.target }} ${VARIANT} ${{ matrix.version }}
 
       - uses: actions/upload-artifact@v7
         with:
-          name: ffmpeg-9.0.2-${{ matrix.target }}-${{ env.VARIANT }}
+          name: ffmpeg-${{ matrix.version }}-${{ matrix.target }}-${{ env.VARIANT }}
           path: artifacts/*
           retention-days: 1
